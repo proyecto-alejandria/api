@@ -22,12 +22,15 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 
 INSTALLED_APPS = [
+    # Django
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # 1st party
+    "users",
 ]
 
 MIDDLEWARE = [
@@ -91,6 +94,8 @@ if not DEBUG:
             },
         ]
     )
+
+AUTH_USER_MODEL = "users.User"
 
 CSRF_COOKIE_SECURE = env.bool("USE_HTTPS", default=False)
 
