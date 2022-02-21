@@ -8,6 +8,7 @@ from environ import Env
 env = Env()
 env.read_env(".env")
 
+
 # Application definition
 
 BASE_DIR = Path(__file__).resolve().parent.parent
