@@ -7,11 +7,20 @@ Requisitos para desarrollo:
 
 ## Configuración
 
-La configuración del sistema se carga mediante [django-environ](https://django-environ.readthedocs.io/en/latest/) a través del fichero `.env`. Los [URIs](https://es.wikipedia.org/wiki/Identificador_de_recursos_uniforme) deben seguir el [formato apropiado](https://datatracker.ietf.org/doc/html/rfc3986#section-3).
+La configuración del sistema se carga mediante [django-environ](https://django-environ.readthedocs.io/en/latest/) a través del fichero `.env`; se proporciona un fichero `.env.example` de ejemplo. Los [URIs](https://es.wikipedia.org/wiki/Identificador_de_recursos_uniforme) deben seguir el [formato apropiado](https://datatracker.ietf.org/doc/html/rfc3986#section-3).
+
+> Es necesario establecer la variable `SECRET_KEY` para ejecutar el servidor de desarrollo de Django.
 
 Las variables disponibles son las siguientes:
 
 ### Principal
+
+#### `SECRET_KEY`
+
+* Tipo: `str`
+* Sin valor por defecto
+
+Establece el [`SECRET_KEY` de Django](https://docs.djangoproject.com/en/4.0/ref/settings/#std:setting-SECRET_KEY).
 
 #### `DEBUG`
 
@@ -30,13 +39,6 @@ Adicionalmente, se utiliza para configurar determinadas entradas de configuraci�
 Utilizado para establecer la base de datos por defecto en la entrada [`DATABASES` de Django](https://docs.djangoproject.com/en/4.0/ref/settings/#std:setting-DATABASES).
 
 ### Seguridad
-
-#### `SECRET_KEY`
-
-* Tipo: `str`
-* Valor por defecto: sí
-
-Establece el [`SECRET_KEY` de Django](https://docs.djangoproject.com/en/4.0/ref/settings/#std:setting-SECRET_KEY).
 
 #### `ALLOWED_HOSTS`
 
