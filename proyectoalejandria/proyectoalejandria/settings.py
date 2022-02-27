@@ -157,6 +157,13 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 
+# App public settings
+
+REGISTER_ENABLED = cast(bool, env.bool("REGISTER_ENABLED"))
+
+PUBLIC_SITE = cast(bool, env.bool("PUBLIC_SITE"))
+
+
 # Rest Framework
 
 REST_FRAMEWORK = {
@@ -199,6 +206,9 @@ DJOSER = {
         "current_user": "users.serializers.CurrentUserSerializer",
     },
 }
+
+if not REGISTER_ENABLED:
+    DJOSER["PERMISSIONS"]["user_create"] = ["rest_framework.permissions.IsAdminUser"]
 
 SIMPLE_JWT = {
     "AUTH_HEADER_TYPES": ("JWT",),
