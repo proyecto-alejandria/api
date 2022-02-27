@@ -7,6 +7,7 @@ from environ import Env
 
 env = Env()
 env.read_env(".env")
+env.read_env(".env.defaults")
 
 
 # Application definition
@@ -15,9 +16,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = env.str("SECRET_KEY")
 
-DEBUG = cast(bool, env.bool("DEBUG", default=True))
+DEBUG = cast(bool, env.bool("DEBUG"))
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+APP_URL = cast(str, env.str("APP_URL"))
+
+ALLOWED_HOSTS = cast(list, env.list("ALLOWED_HOSTS"))
+ALLOWED_HOSTS.append(APP_URL)
 
 
 INSTALLED_APPS = [
@@ -28,11 +32,17 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # 3rd party
+    "rest_framework",
+    "djoser",
+    "rest_framework_simplejwt.token_blacklist",
     # 1st party
     "users",
+    "main",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -68,7 +78,7 @@ WSGI_APPLICATION = "proyectoalejandria.wsgi.application"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 DATABASES = {
-    "default": env.db("DB_URL", default="sqlite:///db.sqlite3"),
+    "default": env.db("DB_URL"),
 }
 
 
@@ -100,6 +110,13 @@ CSRF_COOKIE_SECURE = env.bool("USE_HTTPS", default=False)
 
 SESSION_COOKIE_SECURE = env.bool("USE_HTTPS", default=False)
 
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = [
+        APP_URL,
+    ]
+
 
 # Communication
 
@@ -114,6 +131,9 @@ if not DEBUG:
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
     EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=True)
+
+    DEFAULT_FROM_EMAIL = env.str("EMAIL_FROM")
+    SERVER_EMAIL = DEFAULT_FROM_EMAIL
 
     EMAIL_CONFIG = env.email_url("EMAIL_URL")
     vars().update(EMAIL_CONFIG)
@@ -135,3 +155,55 @@ USE_TZ = True
 # Static files
 
 STATIC_URL = "static/"
+
+
+# Rest Framework
+
+REST_FRAMEWORK = {
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/minute",
+    },
+}
+
+if DEBUG:
+    cast(list, REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"]).append(
+        "rest_framework.renderers.BrowsableAPIRenderer"
+    )
+
+    cast(list, REST_FRAMEWORK["DEFAULT_AUTHENTICATION_CLASSES"]).append(
+        # To allow authentication in the browsable API
+        "rest_framework.authentication.SessionAuthentication"
+    )
+
+DJOSER = {
+    "PASSWORD_RESET_CONFIRM_URL": APP_URL + "/reiniciar-clave/{uid}/{token}",
+    "ACTIVATION_URL": APP_URL + "/activar-cuenta/{uid}/{token}",
+    "SEND_ACTIVATION_EMAIL": True,
+    "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
+    "PERMISSIONS": {
+        "username_reset": ["rest_framework.permissions.IsAdminUser"],
+        "username_reset_confirm": ["rest_framework.permissions.IsAdminUser"],
+        "set_username": ["rest_framework.permissions.IsAdminUser"],
+        "user_delete": ["rest_framework.permissions.IsAdminUser"],
+    },
+    "SERIALIZERS": {
+        "current_user": "users.serializers.CurrentUserSerializer",
+    },
+}
+
+SIMPLE_JWT = {
+    "AUTH_HEADER_TYPES": ("JWT",),
+    "ROTATE_REFRESH_TOKENS": True,
+}
+
+if not DEBUG:
+    SIMPLE_JWT["BLACKLIST_AFTER_ROTATION"] = True
