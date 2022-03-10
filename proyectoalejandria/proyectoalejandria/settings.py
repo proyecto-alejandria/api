@@ -23,6 +23,8 @@ APP_URL = cast(str, env.str("APP_URL"))
 ALLOWED_HOSTS = cast(list, env.list("ALLOWED_HOSTS"))
 ALLOWED_HOSTS.append(APP_URL)
 
+SITE_ID = 1
+
 
 INSTALLED_APPS = [
     # Django
@@ -32,6 +34,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
     # 3rd party
     "rest_framework",
     "djoser",
@@ -192,8 +195,8 @@ if DEBUG:
     )
 
 DJOSER = {
-    "PASSWORD_RESET_CONFIRM_URL": APP_URL + "/reiniciar-clave/{uid}/{token}",
-    "ACTIVATION_URL": APP_URL + "/activar-cuenta/{uid}/{token}",
+    "PASSWORD_RESET_CONFIRM_URL": "cuenta/reiniciar-clave/{uid}/{token}",
+    "ACTIVATION_URL": "cuenta/activar/{uid}/{token}",
     "SEND_ACTIVATION_EMAIL": True,
     "PASSWORD_CHANGED_EMAIL_CONFIRMATION": True,
     "PERMISSIONS": {
@@ -204,6 +207,7 @@ DJOSER = {
     },
     "SERIALIZERS": {
         "current_user": "users.serializers.CurrentUserSerializer",
+        "user_create": "users.serializers.CreateUserSerializer",
     },
 }
 
