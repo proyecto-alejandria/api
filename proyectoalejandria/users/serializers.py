@@ -6,7 +6,15 @@ from djoser.serializers import (
 from .models import User
 
 
+USER_FIELDS = ("id", "email", "first_name", "last_name")
+
+
 class CurrentUserSerializer(UserSerializer):
+    class Meta:
+        model = User
+        fields = USER_FIELDS
+        read_only_fields = ("id", "email")
+
     def to_representation(self, instance: User) -> dict:
         data = super().to_representation(instance)
         data["permissions"] = instance.get_all_permissions()
@@ -18,8 +26,7 @@ class CurrentUserSerializer(UserSerializer):
 class CreateUserSerializer(UserCreateSerializer):
     class Meta:
         model = User
-        fields = UserCreateSerializer.Meta.fields
-        read_only_fields = ("username",)  # This makes the username field not required
+        fields = USER_FIELDS + ("password",)
 
     def create(self, validated_data: dict) -> User:
         validated_data["username"] = validated_data["email"]
